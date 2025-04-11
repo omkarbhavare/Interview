@@ -1,0 +1,283 @@
+Lexical Scoping:Lexical scoping means that a function can remember and access variables from its parent scope, even after the parent function has finished executing.
+ The scope is determined by where the function is defined in the source code, not by where or how it's called during execution.
+
+Benefit : Makes closures, arrow functions, and modular code possible
+
+```
+function outer() {
+  const secret = "🔥 Top Secret 🔐";
+
+  function inner() {
+    console.log("Accessing from inner:", secret); // ✅ Can access
+  }
+
+  return inner; // returning the function, not executing it
+}
+
+const remember = outer(); // outer runs, returns `inner`
+remember(); // STILL prints "🔥 Top Secret 🔐"
+```
+
+First class functions: function which can be assigned to variables, passed as arguments, and returned from other functions are call first class functions
+
+example: currying & arrow function
+
+Closure: A closure is when a **function “remembers” variables from its outer scope even after that outer function has finished executing. 
+
+✅ Main Uses of Closures
+
+1. Data Privacy / Encapsulation: Keeps variables private inside a function
+2. Function Factories: Returns new functions with pre-configured behavior
+3. Helps retain access to outer variables when async tasks finish
+
+
+🔒 How can closures be used to create private variables?
+
+You can use closures to "hide" variables inside a function, so they can’t be accessed or modified directly from the outside.
+
+🔧 Example: Private Counter
+
+```
+function createCounter() {
+  let count = 0; // private variable
+
+  return {
+    increment() {
+      count++;
+      console.log(count);
+    },
+    getCount() {
+      return count;
+    }
+  };
+}
+
+const counter = createCounter();
+
+counter.increment(); // 1
+counter.increment(); // 2
+console.log(counter.getCount()); // 2
+// No way to directly change `count` from outside 👌
+```
+
+
+🎯 How do closures help in event handling or callbacks?
+
+Closures allow event handlers or async callbacks to remember context or some state, even after the outer function is long gone.
+
+```
+function attachEventHandlers() {
+  let message = "You clicked the button!";
+
+  document.getElementById("btn").addEventListener("click", function () {
+    alert(message); // closure captures `message`
+  });
+}
+
+Even though attachEventHandlers() finishes, the inner function still remembers message when the user clicks.
+
+function greetLater(name) {
+  setTimeout(function () {
+    console.log("Hello " + name);
+  }, 2000);
+}
+
+greetLater("Omkar");
+
+setTimeout’s callback still remembers the value of name, even though greetLater() is done running. That’s the power of closure.
+```
+
+
+⚠️ Drawbacks / Pitfalls of Using Closures
+
+
+1. 📦 Memory Overhead: Closures keep their outer scope variables alive — which means unused data may stay in memory longer than needed.
+2. Accidental Data Sharing: All instances may share the same closed-over variable if not handled carefully.
+3. Debugging Difficulty: It can be tricky to trace what variables are being remembered and where they came from.
+
+
+🧠 How Can Closures Lead to Memory Leaks?
+
+
+🔁 Scenario: DOM + Closure = Potential Leak
+
+```
+function setup() {
+  let bigData = new Array(1000000).fill("🧠"); // Big data
+
+  document.getElementById("btn").onclick = function () {
+    console.log(bigData[0]);
+  };
+}
+
+bigData is captured in the closure of the click handler.
+
+Even if you're done with setup(), that massive array stays in memory because the handler still references it.
+
+If this element is removed from the DOM but the handler is not cleaned → memory leak 🚨
+```
+
+
+✅ Best Practices to Avoid Closure Issues
+
+Here’s your senior-dev cheat sheet:
+
+✅ Best Practice
+Memory leaks with DOM      --> Clean up event listeners when not needed (removeEventListener)
+Closures in loops          --> Use let instead of var for proper block scoping
+Long-lived closures        --> Don’t hold large data in closures unless necessary
+Anonymous functions        --> Name them for better debugging
+Unintentional shared state --> Create new closures per iteration instead of reusing one
+
+
+Properly remove event listeners from inside a closure
+
+function setup() {
+  let count = 0;
+
+  function handleClick() {
+    count++;
+    console.log("Clicked:", count);
+  }
+
+  const btn = document.getElementById("btn");
+  btn.addEventListener("click", handleClick);
+
+  // 👉 Return a cleanup function
+  return function cleanup() {
+    btn.removeEventListener("click", handleClick);
+    console.log("Listener removed ✅");
+  };
+}
+
+// 💡 Usage
+const removeHandler = setup();
+
+// Later when not needed
+removeHandler(); // ✅ Frees memory
+
+
+🔍 How Do Closures Impact Performance?
+
+Closures keep variables alive even after the outer function has finished execution.
+
+🔗 Behind the scenes:
+
+When a closure is created:
+- The JavaScript engine keeps the entire lexical environment in memory.
+- This includes only the variables that are actually used inside the closure (thanks to smart modern engines like V8).
+
+
+🚨 When Can Closures Cause Performance Problems?
+
+
+
+
+
+1. Memory Leaks / Unnecessary Retention
+
+If a closure captures a large object, DOM node, or unused variable, it might stay in memory forever unless explicitly released.
+```
+function setup() {
+  const bigData = new Array(1000000).fill("🧠");
+
+  document.getElementById("btn").onclick = () => {
+    console.log("Button clicked!");
+  };
+}
+🔴 bigData is still in memory, even though it's never used in the closure — wasteful!
+```
+
+
+2.  Closures Inside Loops (Poor Practice)
+
+```
+for (let i = 0; i < 100000; i++) {
+  setTimeout(() => console.log(i), 1000);
+}
+
+Creating thousands of closures like this can stress the engine.
+
+Each closure retains a unique copy of the variable — huge memory pressure.
+```
+
+
+✅ How to Clean Up Closures (in Real-World Terms)
+
+
+🔧 1. Remove Event Listeners that Use Closures
+
+```
+function setup() {
+  const name = "Omkar";
+
+  function handleClick() {
+    console.log("Hi", name); // closure holds 'name'
+  }
+
+  const btn = document.getElementById("btn");
+  btn.addEventListener("click", handleClick);
+
+  // Cleanup
+  return function cleanup() {
+    btn.removeEventListener("click", handleClick); // ✅
+  };
+}
+
+const stop = setup();
+
+// Later when not needed
+stop(); // removes closure reference
+```
+
+
+⏱️ 2. Clear Intervals or Timeouts That Use Closures
+
+```
+function startTimer() {
+  let counter = 0;
+
+  const id = setInterval(() => {
+    console.log("Count:", counter++);
+  }, 1000);
+
+  return function stopTimer() {
+    clearInterval(id); // ✅
+  };
+}
+
+const stop = startTimer();
+
+// Later: stop it
+stop();
+```
+
+
+
+🗑️ 3. Nullify Large Captured Variables (optional): 
+
+Not always needed — but good if closure is held for long.
+```
+function setup() {
+  let bigData = new Array(1000000).fill("🧠");
+
+  return function cleanup() {
+    bigData = null; // 🧼 Allow garbage collection
+  };
+}
+```
+
+
+⚠️ 4. Avoid Global References to Closures:  Don't store closures in global arrays/objects unless necessary:
+
+
+```
+const closures = [];
+
+function addClosure() {
+  let i = 0;
+  closures.push(() => i++); // ❌ Memory retained
+}
+
+closures.length = 0; // ✅ Clears all stored closures
+```

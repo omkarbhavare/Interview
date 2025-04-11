@@ -1,0 +1,92 @@
+Arrow Function: Arrow functions are a shorter way to write functions in JavaScript.
+ They don’t have their own this, and instead inherit this from the surrounding (lexical) scope.
+ They're great for callbacks, one-liners, and preserving context, especially in methods like map, filter, or event handlers.
+
+```
+// Basic one-liner
+const add = (a, b) => a + b;
+console.log(add(2, 3)); // 5
+
+// With curly braces and return
+const multiply = (a, b) => {
+  return a * b;
+};
+
+// Single param (no need for parens)
+const square = x => x * x;
+
+// No params
+const greet = () => console.log("Hello, Omkar!");
+
+// Returning object (wrap in parentheses!)
+const getUser = () => ({ name: "Omkar", age: 27 });
+```
+
+
+✅ A. Lexical this --> Arrow functions do not bind their own this → they inherit from the surrounding context
+
+
+```
+❌ Problem with Traditional Function
+
+function Timer() {
+  this.seconds = 0;
+
+  setInterval(function () {
+    this.seconds++; // ❌ `this` is NOT the Timer instance
+    console.log(this.seconds); // NaN or error
+  }, 1000);
+}
+new Timer();
+
+
+✅ Arrow Function Solution
+
+function Timer() {
+  this.seconds = 0;
+
+  setInterval(() => {
+    this.seconds++; // ✅ Correct! Lexical `this` from Timer
+    console.log(this.seconds);
+  }, 1000);
+}
+new Timer();
+```
+
+
+✅ B. Cleaner in Array Methods--> 🎯 Arrow functions are ideal for functional programming: map, filter, reduce, sort, forEach
+
+```
+const numbers = [1, 2, 3];
+
+// Traditional way
+const doubled = numbers.map(function (num) {
+  return num * 2;
+});
+
+// Arrow function way
+const doubledArrow = numbers.map(num => num * 2);
+```
+
+
+🧪 Edge Cases & Gotchas
+
+
+❌ Arrow Functions Can't Be Used as Constructors
+
+Arrow functions don’t have their own this or prototype, so can't be used with new.
+
+❌ No arguments Object
+
+```
+const showArgs = () => {
+  console.log(arguments); // ❌ ReferenceError
+};
+showArgs(1, 2, 3);
+
+✅ Use Rest Parameters Instead
+const showArgs = (...args) => {
+  console.log(args); // ✅ [1, 2, 3]
+};
+showArgs(1, 2, 3);
+```

@@ -1,0 +1,109 @@
+Higher-Order Function: 
+A higher-order function is a function that either:
+1. Takes one or more functions as arguments, or
+2. Returns another function as its result, or
+3. Do Both
+Commonly Used For:: Abstraction, Code reusability , Composition , Callbacks & Event handling
+
+
+🧪 Examples: HOFs in Action
+
+```
+🔁 1. Takes a Function as an Argument
+
+function greetUser(name, formatter) {
+  return formatter(name);
+}
+
+function upperCaseName(name) {
+  return `Hello, ${name.toUpperCase()}`;
+}
+
+console.log(greetUser("Omkar", upperCaseName)); // ✅ Hello, OMKAR
+
+🔄 2. Returns a Function
+
+function multiplier(x) {
+  return function(y) {
+    return x * y;
+  };
+}
+
+const double = multiplier(2);
+console.log(double(5)); // ✅ 10
+
+🔂 3. Takes & Returns Function
+
+function withLogging(fn) {
+  return function(...args) {
+    console.log("Arguments:", args);
+    const result = fn(...args);
+    console.log("Result:", result);
+    return result;
+  };
+}
+
+const add = (a, b) => a + b;
+const loggedAdd = withLogging(add);
+
+loggedAdd(2, 3); 
+// ✅ Logs arguments and result
+
+📦 Use Case: Array Methods (Built-in HOFs)
+
+const nums = [1, 2, 3, 4, 5];
+
+const squared = nums.map(num => num * num);
+console.log(squared); // ✅ [1, 4, 9, 16, 25]
+
+.map() is a higher-order function because it takes a function as an argument (num => num * num).
+
+```
+
+Currying : Currying is a higher-order function technique that transforms a function with multiple arguments into a sequence of functions, each taking a single argument, enhancing code reusability, abstraction, and composability.
+```
+function add(a, b) {
+  return a + b;
+}
+
+// Curried version:
+function curriedAdd(a) {
+  return function(b) {
+    return a + b;
+  };
+}
+
+console.log(curriedAdd(2)(3)); // 🔥 Output: 5
+```
+
+
+🆚 Currying vs Partial Application
+
+Feature
+Currying
+Partial Application
+✅ Input
+One argument at a time
+Multiple arguments at once
+🎯 Output
+Series of single-arg functions
+New function with some args preset
+🔁 Flexibility
+Every arg gets its own function
+Only some args are preset
+📦 Use case
+Functional pipelines
+Configuration or customization
+
+Rest Operator (...)
+
+The rest operator allows a function to accept an indefinite number of arguments as an array. It’s used to gather all remaining parameters into one variable, improving flexibility. This is especially useful when you don’t know how many arguments will be passed to a function. It simplifies function signatures and enhances code readability.
+
+
+Spread Operator (...)
+
+The spread operator allows the expansion of iterable objects (like arrays or objects) into individual elements. It’s commonly used for shallow copying, merging, or combining arrays and objects. It provides a cleaner, more concise way to manipulate data structures, making code more maintainable and avoiding mutations
+
+IIFE: An IIFE (Immediately Invoked Function Expression) is a function that is defined and invoked immediately, creating a local scope to avoid polluting the global namespace. It's useful for encapsulating code and preventing global variable conflicts.
+
+this keyword: The this keyword refers to the context in which a function is called, typically pointing to the object that invoked the function.In global scope, this refers to the global object, while inside a function, it typically refers to the object that calls the function (like in methods). In arrow functions, this is lexically bound to the surrounding context, meaning it doesn't change based on how the function is invoked.
